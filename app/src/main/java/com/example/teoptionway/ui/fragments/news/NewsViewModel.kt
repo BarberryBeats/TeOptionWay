@@ -10,34 +10,25 @@ import com.example.teoptionway.data.model.News
 import com.example.teoptionway.repositories.NewsRepository
 import com.example.teoptionway.utils.RemoteConfig
 import com.google.gson.Gson
+import kotlinx.coroutines.GlobalScope
 
 class NewsViewModel(app: Application): AndroidViewModel(app) {
+
     private val newsRepository = NewsRepository()
     private val jsonReader = JsonReader()
-    private lateinit var newsList: List<News>
-    private val _news = MutableLiveData<List<News>>()
-    val news: LiveData<List<News>>
-    get() = _news
-    private val _url = MutableLiveData<String>()
-    val url: LiveData<String>
-    get() = _url
 
 
-    fun jsonToGson(json: String) {
+    fun jsonToGson(json: String): LiveData<List<News>> {
         val jsonFileString = jsonReader.getJsonDataFromAsset(getApplication(), json)
         val listResult: List<News> = Gson().fromJson(jsonFileString, Array<News>::class.java).toList()
-        newsList = listResult
+        val listLiveData = MutableLiveData<List<News>>()
+        listLiveData.value = listResult
+        return listLiveData
     }
 
+   fun getUrl(): LiveData<String>{
 
-    fun getNewsList() {
-        _news.value = newsList
-
-    }
-
-    fun getUrl(){
-        Log.d("Ray", "config ${newsRepository.getRemoteConfig().value}")
-        _url.value = newsRepository.getRemoteConfig().value
+        return newsRepository.getRemoteConfig()
     }
 
 

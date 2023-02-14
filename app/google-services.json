@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "962704496208",
+    "firebase_url": "https://teoptionway-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "teoptionway",
+    "storage_bucket": "teoptionway.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:962704496208:android:c074e2cd74619d2d802355",
+        "android_client_info": {
+          "package_name": "com.example.teoptionway"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "962704496208-25m54udiq7hbmp9ophp362jr5i4c0aqj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz3Fq1EY9FbO0Ta-Gg8DGhjfiBVRlLs14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "962704496208-25m54udiq7hbmp9ophp362jr5i4c0aqj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
