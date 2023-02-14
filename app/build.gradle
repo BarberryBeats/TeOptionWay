@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -36,7 +37,8 @@ android {
 }
 
 dependencies {
-
+    implementation 'com.google.firebase:firebase-config-ktx:21.2.1'
+    def nav_version = "2.5.3"
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'com.google.android.material:material:1.8.0'
@@ -45,14 +47,22 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-    //Firebase
-    implementation platform('com.google.firebase:firebase-bom:30.3.1')
-    implementation 'com.google.firebase:firebase-messaging-ktx'
-    implementation 'com.google.firebase:firebase-firestore-ktx'
-
     //Gson
     implementation 'com.google.code.gson:gson:2.10'
 
     //Glide
     implementation 'com.github.bumptech.glide:glide:4.14.2'
+
+
+    // Navigation component
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+    // Firebase BOM
+    implementation platform('com.google.firebase:firebase-bom:31.2.0')
+    implementation 'com.google.firebase:firebase-database-ktx:20.1.0'
+
+    // our core module.
+    implementation project(':core')
+
 }

@@ -1,4 +1,4 @@
-package com.example.teoptionway.model
+package com.example.teoptionway.data.model
 
 data class News(
      val image: String,

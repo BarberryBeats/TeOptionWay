@@ -1,4 +1,4 @@
-package com.example.teoptionway.utils
+package com.example.core.common
 
 import android.content.Context
 import java.io.IOException

@@ -1,11 +1,12 @@
-package com.example.teoptionway.ui.news_activity
+package com.example.teoptionway.ui.fragments.news
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.teoptionway.databinding.ItemNewsBinding
-import com.example.teoptionway.model.News
-import com.example.teoptionway.ui.news_activity.NewsAdapter.ViewHolder
+import com.example.teoptionway.data.model.News
+import com.example.teoptionway.ui.fragments.news.NewsAdapter.ViewHolder
 import com.example.teoptionway.utils.loadImage
 
 
@@ -24,6 +25,7 @@ class NewsAdapter(
 
 
     inner class ViewHolder(private val binding: ItemNewsBinding): RecyclerView.ViewHolder(binding.root){
+        @SuppressLint("SetTextI18n")
         fun bind(){
             val item = newsList[adapterPosition]
 
