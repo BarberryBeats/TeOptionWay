@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <defaultMaps>
     <entry>
-        <key>URL</key>
+        <key>url</key>
         <value>https://google.com</value>
     </entry>
     <entry>

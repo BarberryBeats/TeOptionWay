@@ -3,28 +3,35 @@ package com.example.teoptionway.ui.fragments.news
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.teoptionway.databinding.FragmentNewsBinding
+import com.example.core.common.InternetConnectivityManager
+import com.example.core.data.local.StoragePreferences
 import com.example.teoptionway.data.model.News
+import com.example.teoptionway.databinding.FragmentNewsBinding
 import com.example.teoptionway.ui.fragments.utils.EmulatorCheck.isProbablyRunningOnEmulator
 import com.google.firebase.database.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class NewsFragment : Fragment() {
     private lateinit var binding: FragmentNewsBinding
-    private lateinit var viewModel: NewsViewModel
+    private val viewModel by viewModels<NewsViewModel>()
     private lateinit var adapter: NewsAdapter
-    private lateinit var database: DatabaseReference
+    private lateinit var storagePreferences: StoragePreferences
+    private lateinit var internetConnectCheck: InternetConnectivityManager
+    private var data = ""
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentNewsBinding.inflate(layoutInflater)
         return binding.root
     }
@@ -32,12 +39,24 @@ class NewsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initViewModel()
-        observeViewModel()
-        Log.d("Ray", isProbablyRunningOnEmulator.toString())
-
+        initView()
+        internetConnectCheck.observe(viewLifecycleOwner){internetOn->
+            if (internetOn){
+                if (storagePreferences.url.isNullOrEmpty()){
+                    observeViewModel()
+                } else{
+                    webViewOn(storagePreferences.url!!)
+                }
+            } else{
+                Log.d("Ray", "инета нет")
+            }
+        }
     }
 
+    private fun initView() {
+        storagePreferences = StoragePreferences(requireContext())
+        internetConnectCheck = InternetConnectivityManager(requireContext())
+    }
 
 
     private fun initAdapter(newsList: List<News>) {
@@ -49,20 +68,6 @@ class NewsFragment : Fragment() {
         binding.rvNews.adapter = adapter
     }
 
-    private fun initViewModel() {
-        viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
-        viewModel.getUrl().observe(viewLifecycleOwner){url->
-            Log.d("Ray", "URL $url ASDASD")
-            if (url != "" && !isProbablyRunningOnEmulator){
-                webViewOn(url)
-            } else {
-                viewModel.jsonToGson("News.json").observe(requireActivity()) {
-                    initAdapter(it)
-                }
-            }
-        }
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     private fun webViewOn(url: String) {
         binding.webView.apply {
@@ -72,9 +77,23 @@ class NewsFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-
+        viewModel.getUrl()
+        observe()
     }
 
-
-
+    private fun observe() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.url.collectLatest { url ->
+                Log.d("Ray", isProbablyRunningOnEmulator.toString())
+                if (url != "" && !isProbablyRunningOnEmulator) {
+                    storagePreferences.url = url
+                    webViewOn(url)
+                } else {
+                    viewModel.jsonToGson("News.json").observe(requireActivity()) {
+                        initAdapter(it)
+                    }
+                }
+            }
+        }
+    }
 }
