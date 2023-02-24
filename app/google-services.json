@@ -1,34 +1,33 @@
 {
   "project_info": {
-    "project_number": "962704496208",
-    "firebase_url": "https://teoptionway-default-rtdb.europe-west1.firebasedatabase.app",
-    "project_id": "teoptionway",
-    "storage_bucket": "teoptionway.appspot.com"
+    "project_number": "399722854517",
+    "project_id": "maelfo-a50c4",
+    "storage_bucket": "maelfo-a50c4.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:962704496208:android:c074e2cd74619d2d802355",
+        "mobilesdk_app_id": "1:399722854517:android:dd46124181ce6f6c29203c",
         "android_client_info": {
-          "package_name": "com.example.teoptionway"
+          "package_name": "respo.app.nost"
         }
       },
       "oauth_client": [
         {
-          "client_id": "962704496208-25m54udiq7hbmp9ophp362jr5i4c0aqj.apps.googleusercontent.com",
+          "client_id": "399722854517-did43a1l5ladjm7tm1goifbd3i9rbu9h.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCz3Fq1EY9FbO0Ta-Gg8DGhjfiBVRlLs14"
+          "current_key": "AIzaSyBYs76Fa6p1NYKp6Nv8svxset6hq2xGHWw"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "962704496208-25m54udiq7hbmp9ophp362jr5i4c0aqj.apps.googleusercontent.com",
+              "client_id": "399722854517-did43a1l5ladjm7tm1goifbd3i9rbu9h.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

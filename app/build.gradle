@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.teoptionway'
+    namespace 'respo.app.nost'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.teoptionway"
+        applicationId "respo.app.nost"
         minSdk 23
         targetSdk 33
         versionCode 1
