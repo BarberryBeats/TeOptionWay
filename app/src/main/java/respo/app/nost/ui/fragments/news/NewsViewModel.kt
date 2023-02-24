@@ -25,11 +25,7 @@ class NewsViewModel(app: Application) : AndroidViewModel(app) {
         return listLiveData
     }
 
-    fun getUrl() {
-        viewModelScope.launch {
-            App.repository.getRemoteConfig().collectLatest {
-                _url.value = it
-            }
-        }
+    fun getUrl(): LiveData<String> {
+       return App.repository.getRemoteUrlResult()
     }
 }

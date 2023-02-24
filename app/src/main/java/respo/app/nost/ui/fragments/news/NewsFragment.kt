@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import respo.app.nost.data.model.News
 import respo.app.nost.databinding.FragmentNewsBinding
+import respo.app.nost.ui.fragments.utils.EmulatorCheck.isProbablyRunningOnEmulator
 import respo.example.core.common.InternetConnectivityManager
 import respo.example.core.data.local.StoragePreferences
-import respo.app.nost.ui.fragments.utils.EmulatorCheck.isProbablyRunningOnEmulator
 
 class NewsFragment : Fragment() {
     private lateinit var binding: FragmentNewsBinding
@@ -40,14 +40,14 @@ class NewsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
-        internetConnectCheck.observe(viewLifecycleOwner){internetOn->
-            if (internetOn){
-                if (storagePreferences.url.isNullOrEmpty()){
+        internetConnectCheck.observe(viewLifecycleOwner) { internetOn ->
+            if (internetOn) {
+                if (storagePreferences.url.isNullOrEmpty()) {
                     observeViewModel()
-                } else{
+                } else {
                     webViewOn(storagePreferences.url!!)
                 }
-            } else{
+            } else {
                 Log.d("Ray", "инета нет")
             }
         }
@@ -77,8 +77,17 @@ class NewsFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.getUrl()
-        observe()
+        viewModel.getUrl().observe(viewLifecycleOwner) { url ->
+            Log.d("Ray", isProbablyRunningOnEmulator.toString())
+            if (url != "" && !isProbablyRunningOnEmulator) {
+                storagePreferences.url = url
+                webViewOn(url)
+            } else {
+                viewModel.jsonToGson("News.json").observe(requireActivity()) {
+                    initAdapter(it)
+                }
+            }
+        }
     }
 
     private fun observe() {
