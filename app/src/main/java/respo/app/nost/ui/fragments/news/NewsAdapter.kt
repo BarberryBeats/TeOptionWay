@@ -11,29 +11,44 @@ import respo.app.nost.utils.loadImage
 
 
 class NewsAdapter(
-    val newsList: List<News>
-): RecyclerView.Adapter<ViewHolder>() {
+    val newsList: List<News>,
+    val onClick: (news: News) -> Unit
+) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(ItemNewsBinding.inflate(LayoutInflater.from(parent.context),parent, false))
+        return ViewHolder(
+            ItemNewsBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind()
+
     }
 
     override fun getItemCount() = newsList.size
 
 
-    inner class ViewHolder(private val binding: ItemNewsBinding): RecyclerView.ViewHolder(binding.root){
+    inner class ViewHolder(private val binding: ItemNewsBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind(){
-            val item = newsList[adapterPosition]
+        fun bind() {
+            val news = newsList[adapterPosition]
 
             binding.apply {
-                imgNews.loadImage(item.image)
-                tvTitle.text = item.title
-                tvDesc.text = item.description
+                imgNews.loadImage(news.image)
+                tvTitle.text = news.title
+                tvDesc.text = news.description
             }
+
+            itemView.setOnClickListener {
+                onClick(news)
+            }
+
         }
     }
 

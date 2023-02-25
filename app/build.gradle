@@ -65,4 +65,6 @@ dependencies {
     // our core module.
     implementation project(':core')
 
+    implementation 'com.ms-square:expandableTextView:0.1.4'
+
 }

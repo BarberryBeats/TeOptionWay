@@ -5,14 +5,18 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.*
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.*
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import respo.app.nost.R
 import respo.app.nost.data.model.News
 import respo.app.nost.databinding.FragmentNewsBinding
 import respo.app.nost.ui.fragments.utils.EmulatorCheck.isProbablyRunningOnEmulator
@@ -25,8 +29,10 @@ class NewsFragment : Fragment() {
     private lateinit var adapter: NewsAdapter
     private lateinit var storagePreferences: StoragePreferences
     private lateinit var internetConnectCheck: InternetConnectivityManager
-    private var data = ""
 
+    companion object{
+        const val KEY_FOR_NEWS = "NEWS"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,22 +42,40 @@ class NewsFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
-        internetConnectCheck.observe(viewLifecycleOwner) { internetOn ->
-            if (internetOn) {
-                if (storagePreferences.url.isNullOrEmpty()) {
-                    observeViewModel()
+        if (isProbablyRunningOnEmulator) {
+            viewModel.jsonToGson("News.json").observe(requireActivity()) {
+                binding.webView.visibility = GONE
+                binding.rvNews.visibility = VISIBLE
+
+                Log.d("Ray", it.toString())
+                initAdapter(it)
+
+            }
+        } else {
+            internetConnectCheck.observe(viewLifecycleOwner) { internetOn ->
+                if (internetOn) {
+
+                    if (storagePreferences.url.isNullOrEmpty()) {
+
+                        observeViewModel()
+                    } else {
+                        Log.d("Ray", "else")
+                        binding.webView.visibility = VISIBLE
+                        binding.rvNews.visibility = GONE
+                        webViewOn(storagePreferences.url!!)
+                    }
                 } else {
-                    webViewOn(storagePreferences.url!!)
+                    Log.d("Ray", "инета нет")
                 }
-            } else {
-                Log.d("Ray", "инета нет")
             }
         }
     }
+
 
     private fun initView() {
         storagePreferences = StoragePreferences(requireContext())
@@ -61,7 +85,7 @@ class NewsFragment : Fragment() {
 
     private fun initAdapter(newsList: List<News>) {
 
-        adapter = NewsAdapter(newsList)
+        adapter = NewsAdapter(newsList, this::onClick)
         val llm = LinearLayoutManager(requireContext())
         llm.orientation = LinearLayoutManager.VERTICAL
         binding.rvNews.layoutManager = llm
@@ -71,38 +95,48 @@ class NewsFragment : Fragment() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun webViewOn(url: String) {
         binding.webView.apply {
-            loadUrl(url)
+            Log.d("Ray", "webview $url")
+            settings.domStorageEnabled = true
             settings.javaScriptEnabled = true
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView,
+                    request: WebResourceRequest
+                ): Boolean {
+                    view.loadUrl(request.url.toString())
+                    return true
+                }
+            }
+            loadUrl(url)
         }
     }
 
+
     private fun observeViewModel() {
+
         viewModel.getUrl().observe(viewLifecycleOwner) { url ->
-            Log.d("Ray", isProbablyRunningOnEmulator.toString())
-            if (url != "" && !isProbablyRunningOnEmulator) {
+            if (url.isNotEmpty() && !isProbablyRunningOnEmulator) {
                 storagePreferences.url = url
+                Log.d("Ray", "a")
+
+                Log.d("Ray", url)
+                binding.webView.visibility = VISIBLE
+                binding.rvNews.visibility = GONE
                 webViewOn(url)
             } else {
+                Log.d("Ray", "asdasd")
+                binding.webView.visibility = GONE
+                binding.rvNews.visibility = VISIBLE
                 viewModel.jsonToGson("News.json").observe(requireActivity()) {
                     initAdapter(it)
                 }
             }
         }
     }
-
-    private fun observe() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.url.collectLatest { url ->
-                Log.d("Ray", isProbablyRunningOnEmulator.toString())
-                if (url != "" && !isProbablyRunningOnEmulator) {
-                    storagePreferences.url = url
-                    webViewOn(url)
-                } else {
-                    viewModel.jsonToGson("News.json").observe(requireActivity()) {
-                        initAdapter(it)
-                    }
-                }
-            }
-        }
+    private fun onClick(news: News) {
+        findNavController().navigate(R.id.newsDetailFragment, bundleOf(KEY_FOR_NEWS to news))
     }
+
 }
+
+
