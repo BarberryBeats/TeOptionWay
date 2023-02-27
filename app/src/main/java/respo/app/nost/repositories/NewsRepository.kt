@@ -1,6 +1,5 @@
 package respo.app.nost.repositories
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import respo.app.nost.R
@@ -14,11 +13,15 @@ class NewsRepository {
         val liveData = MutableLiveData<String>()
         remoteConfig.setConfigSettingsAsync(configSettings)
         remoteConfig.setDefaultsAsync(R.xml.remote_config_default)
-        remoteConfig.fetchAndActivate().addOnCompleteListener {
-            liveData.value = remoteConfig.getString("url")
-        }.addOnFailureListener {
-            Log.d("Ray", "failure")
+        try {
+            remoteConfig.fetchAndActivate().addOnCompleteListener {
+                liveData.value = remoteConfig.getString("url")
+            }.addOnFailureListener {
+            }
+        } catch(e: Exception){
+
         }
+
 
         return liveData
     }

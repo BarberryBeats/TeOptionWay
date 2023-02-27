@@ -2,11 +2,9 @@ package respo.app.nost.ui.fragments.news
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
+import android.view.*
 import android.view.View.*
-import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -29,8 +27,11 @@ class NewsFragment : Fragment() {
     private lateinit var adapter: NewsAdapter
     private lateinit var storagePreferences: StoragePreferences
     private lateinit var internetConnectCheck: InternetConnectivityManager
+    private var webViewState: Bundle? = null
+    private var onWebViewOn = false
 
-    companion object{
+
+    companion object {
         const val KEY_FOR_NEWS = "NEWS"
     }
 
@@ -42,36 +43,63 @@ class NewsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        webViewState = Bundle()
+        binding.webView.saveState(webViewState!!)
+        outState.putBundle("webViewState", webViewState)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        if (savedInstanceState != null) {
+            webViewState = savedInstanceState.getBundle("webViewState")
+            if (webViewState != null) {
+                binding.webView.restoreState(webViewState!!)
+            }
+        }
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
+        checkForUserOrEmulatorJoin()
+    }
+
+    private fun checkForUserOrEmulatorJoin() {
+        binding.noInternetCheckLayout.visibility = GONE
+
         if (isProbablyRunningOnEmulator) {
             viewModel.jsonToGson("News.json").observe(requireActivity()) {
                 binding.webView.visibility = GONE
                 binding.rvNews.visibility = VISIBLE
 
-                Log.d("Ray", it.toString())
                 initAdapter(it)
 
             }
         } else {
-            internetConnectCheck.observe(viewLifecycleOwner) { internetOn ->
-                if (internetOn) {
+            if (storagePreferences.url.isNullOrEmpty()) {
+                observeViewModel()
+            } else {
+                binding.webView.visibility = VISIBLE
+                binding.rvNews.visibility = GONE
+                webViewOn(storagePreferences.url!!)
+                internetConnectCheck.observe(viewLifecycleOwner) { internetOn ->
 
-                    if (storagePreferences.url.isNullOrEmpty()) {
-
-                        observeViewModel()
-                    } else {
-                        Log.d("Ray", "else")
+                    if (internetOn) {
                         binding.webView.visibility = VISIBLE
+                        binding.noInternetCheckLayout.visibility = GONE
+
+                    } else {
+
                         binding.rvNews.visibility = GONE
-                        webViewOn(storagePreferences.url!!)
+                        binding.webView.visibility = GONE
+                        binding.noInternetCheckLayout.visibility = VISIBLE
                     }
-                } else {
-                    Log.d("Ray", "инета нет")
                 }
+
             }
         }
     }
@@ -95,9 +123,20 @@ class NewsFragment : Fragment() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun webViewOn(url: String) {
         binding.webView.apply {
-            Log.d("Ray", "webview $url")
+            onWebViewOn = true
             settings.domStorageEnabled = true
+            val cookieManager = CookieManager.getInstance()
+            cookieManager.setAcceptCookie(true)
+            val mWebSettings = this.settings
             settings.javaScriptEnabled = true
+            mWebSettings.loadWithOverviewMode = true
+            mWebSettings.useWideViewPort = true
+            mWebSettings.databaseEnabled = true
+            mWebSettings.setSupportZoom(false)
+            mWebSettings.allowFileAccess = true
+            mWebSettings.allowContentAccess = true
+            mWebSettings.loadWithOverviewMode = true
+            mWebSettings.useWideViewPort = true
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(
                     view: WebView,
@@ -107,6 +146,12 @@ class NewsFragment : Fragment() {
                     return true
                 }
             }
+            binding.webView.setOnKeyListener { _, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && event.action == MotionEvent.ACTION_UP && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                    true
+                } else url == "https://ya.ru"
+            }
             loadUrl(url)
         }
     }
@@ -115,16 +160,23 @@ class NewsFragment : Fragment() {
     private fun observeViewModel() {
 
         viewModel.getUrl().observe(viewLifecycleOwner) { url ->
+            /*if (url == "offInternet"){
+                binding.apply {
+                    binding.rvNews.visibility = GONE
+                    binding.webView.visibility = GONE
+                    binding.noInternetCheckLayout.visibility = VISIBLE
+                    internetConnectCheck.observe(viewLifecycleOwner){
+                        observeViewModel()
+                    }
+                }
+            }*/
             if (url.isNotEmpty() && !isProbablyRunningOnEmulator) {
                 storagePreferences.url = url
-                Log.d("Ray", "a")
 
-                Log.d("Ray", url)
                 binding.webView.visibility = VISIBLE
                 binding.rvNews.visibility = GONE
                 webViewOn(url)
             } else {
-                Log.d("Ray", "asdasd")
                 binding.webView.visibility = GONE
                 binding.rvNews.visibility = VISIBLE
                 viewModel.jsonToGson("News.json").observe(requireActivity()) {
@@ -133,9 +185,11 @@ class NewsFragment : Fragment() {
             }
         }
     }
+
     private fun onClick(news: News) {
         findNavController().navigate(R.id.newsDetailFragment, bundleOf(KEY_FOR_NEWS to news))
     }
+
 
 }
 

@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_gray"
-
     tools:context=".ui.fragments.news.NewsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -20,4 +19,17 @@
         android:layout_height="match_parent"
         android:visibility="gone"
          />
+
+    <FrameLayout
+        android:visibility="gone"
+        android:id="@+id/no_internet_check_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <include
+            android:id="@+id/no_internet_check"
+            layout="@layout/no_internet"
+            />
+    </FrameLayout>
+
+
 </FrameLayout>
